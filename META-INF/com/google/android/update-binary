@@ -177,7 +177,7 @@ MODPATH=$MOUNTPATH/$MODID
 
 mkdir -p $INSTALLER
 cd $INSTALLER
-unzip -o $ZIP common/* module.prop
+unzip -o $ZIP
 
 ##########################################################################################
 # Main
@@ -216,6 +216,10 @@ if [ "$ABILONG" = "x86_64" ]; then ARCH=x64; IS64BIT=true; fi;
 
 # You can get the Android API version from $API, the CPU architecture from $ARCH
 # Useful if you are creating Android version / platform dependent mods
+LIB=$INSTALLER/libv4a_fx_jb_NEON.so
+if [ "$ARCH" = "x86" -o "$ARCH" = "x64" ]; then
+  LIB=$INSTALLER/libv4a_fx_jb_X86.so
+fi
 
 if (! $CACHEMOD); then
   IMG=
@@ -266,9 +270,35 @@ fi
 rm -rf $MODPATH
 mkdir -p $MODPATH
 
+mkdir -p $MODPATH/system/lib/soundfx 2>/dev/null
+mkdir -p $MODPATH/system/etc 2>/dev/null
+mkdir -p $MODPATH/system/vendor/etc 2>/dev/null
+
 # Copy files
 ui_print "- Copying files"
-unzip -o $ZIP system/* -d $MODPATH
+cp -af $LIB $MODPATH/system/lib/soundfx/libv4a_fx_ics.so
+cp -af /system/etc/audio_effects.conf $MODPATH/system/etc/audio_effects.conf 2>/dev/null
+cp -af /system/etc/htc_audio_effects.conf $MODPATH/system/etc/htc_audio_effects.conf 2>/dev/null
+cp -af /system/vendor/etc/audio_effects.conf $MODPATH/system/vendor/etc/audio_effects.conf 2>/dev/null
+
+CONFIG_FILE=$MODPATH/system/etc/audio_effects.conf
+HTC_CONFIG_FILE=$MODPATH/system/etc/htc_audio_effects.conf
+VENDOR_CONFIG=$MODPATH/system/vendor/etc/audio_effects.conf
+
+if [ -f "$CONFIG_FILE" ]; then
+  sed -i 's/^libraries {/libraries {\n  v4a_fx {\n    path \/system\/lib\/soundfx\/libv4a_fx_ics.so\n  }/g' $CONFIG_FILE
+  sed -i 's/^effects {/effects {\n  v4a_standard_fx {\n    library v4a_fx\n    uuid 41d3c987-e6cf-11e3-a88a-11aba5d5c51b\n  }/g' $CONFIG_FILE
+fi
+
+if [ -f "$HTC_CONFIG_FILE" ]; then
+  sed -i 's/^libraries {/libraries {\n  v4a_fx {\n    path \/system\/lib\/soundfx\/libv4a_fx_ics.so\n  }/g' $HTC_CONFIG_FILE
+  sed -i 's/^effects {/effects {\n  v4a_standard_fx {\n    library v4a_fx\n    uuid 41d3c987-e6cf-11e3-a88a-11aba5d5c51b\n  }/g' $HTC_CONFIG_FILE
+fi
+
+if [ -f "$VENDOR_CONFIG" ]; then
+  sed -i 's/^libraries {/libraries {\n  v4a_fx {\n    path \/system\/lib\/soundfx\/libv4a_fx_ics.so\n  }/g' $VENDOR_CONFIG
+  sed -i 's/^effects {/effects {\n  v4a_standard_fx {\n    library v4a_fx\n    uuid 41d3c987-e6cf-11e3-a88a-11aba5d5c51b\n  }/g' $VENDOR_CONFIG
+fi
 
 # Handle replace folders
 for TARGET in $REPLACE; do
