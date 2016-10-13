@@ -214,6 +214,13 @@ if [ "$ABI2" = "x86" ]; then ARCH=x86; fi;
 if [ "$ABILONG" = "arm64-v8a" ]; then ARCH=arm64; IS64BIT=true; fi;
 if [ "$ABILONG" = "x86_64" ]; then ARCH=x64; IS64BIT=true; fi;
 
+# Specific fix for OnePlus3Oxygen on /system/vendor/audio_effects.conf
+FIXVENDORCONF=false
+ONEPLUSROM=
+ONEPLUSROM=$(cat /system/build.prop | grep "ro.build.ota.versionname=")
+ONEPLUSROM=${NAME:25:14}
+if [ "$ONEPLUSROM" = "OnePlus3Oxygen" ]; then FIXVENDORCONF=true; fi;
+
 # You can get the Android API version from $API, the CPU architecture from $ARCH
 # Useful if you are creating Android version / platform dependent mods
 LIB=$INSTALLER/libv4a_fx_jb_NEON.so
@@ -279,7 +286,12 @@ ui_print "- Copying files"
 cp -af $LIB $MODPATH/system/lib/soundfx/libv4a_fx_ics.so
 cp -af /system/etc/audio_effects.conf $MODPATH/system/etc/audio_effects.conf 2>/dev/null
 cp -af /system/etc/htc_audio_effects.conf $MODPATH/system/etc/htc_audio_effects.conf 2>/dev/null
-cp -af /system/vendor/etc/audio_effects.conf $MODPATH/system/vendor/etc/audio_effects.conf 2>/dev/null
+# Specific fix for OnePlus3Oxygen on /system/vendor/audio_effects.conf
+if (! $FIXVENDORCONF); then
+  cp -af /system/vendor/etc/audio_effects.conf $MODPATH/system/vendor/etc/audio_effects.conf 2>/dev/null
+else
+  cp -af /system/etc/audio_effects.conf $MODPATH/system/vendor/etc/audio_effects.conf 2>/dev/null
+fi
 
 CONFIG_FILE=$MODPATH/system/etc/audio_effects.conf
 HTC_CONFIG_FILE=$MODPATH/system/etc/htc_audio_effects.conf
