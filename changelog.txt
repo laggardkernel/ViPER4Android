@@ -1,2 +1,5 @@
 v2.4.0.1 (Magisk v2)
     - Add Nougat SELinux patch
+    - (Magisk v3)
+    - deep_buffer and raw removal for more compatibility
+    - Specific fix for OnePlus3Oxygen on /system/vendor/audio_effects.conf
