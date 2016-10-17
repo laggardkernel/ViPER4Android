@@ -169,17 +169,11 @@ fi
 source config.sh
 
 if ($CACHEMOD); then
-#  MOUNTPATH=$CACHEPATH
-  CACHEMODPATH=$CACHEPATH/$MODID
+  MOUNTPATH=$CACHEPATH
 fi
 
 INSTALLER=$TMPDIR/$MODID
 MODPATH=$MOUNTPATH/$MODID
-
-# Delete existing audio mod in case of collision coz of mod of confs
-rm -rf $INSTALLER
-rm -rf $TMPDIR/dap
-rm -rf $TMPDIR/dax
 
 mkdir -p $INSTALLER
 cd $INSTALLER
@@ -220,16 +214,7 @@ if [ "$ABI2" = "x86" ]; then ARCH=x86; fi;
 if [ "$ABILONG" = "arm64-v8a" ]; then ARCH=arm64; IS64BIT=true; fi;
 if [ "$ABILONG" = "x86_64" ]; then ARCH=x64; IS64BIT=true; fi;
 
-NAME=
-NAME=$(cat /system/build.prop | grep "ro.product.name=")
-if [ "$NAME" = "" ]; then
-  NAME=$(cat /system/build.prop | grep "ro.build.product=")
-  NAME=${NAME:17}
-else
-  NAME=${NAME:16}
-fi
-
-# Specific for OnePlus3Oxygen to fix /system/vendor/audio_effects.conf
+# Specific fix for OnePlus3Oxygen on /system/vendor/audio_effects.conf
 FIXVENDORCONF=false
 ONEPLUSROM=
 ONEPLUSROM=$(cat /system/build.prop | grep "ro.build.ota.versionname=")
@@ -243,7 +228,7 @@ if [ "$ARCH" = "x86" -o "$ARCH" = "x64" ]; then
   LIB=$INSTALLER/libv4a_fx_jb_X86.so
 fi
 
-#if (! $CACHEMOD); then
+if (! $CACHEMOD); then
   IMG=
   if (is_mounted /data); then
     IMG=/data/$IMGNAME
@@ -286,16 +271,11 @@ fi
     ui_print "! $IMG mount failed... abort"
     exit 1
   fi
-#fi
+fi
 
 # Create mod paths
 rm -rf $MODPATH
 mkdir -p $MODPATH
-
-rm -rf $CACHEMODPATH
-if ($CACHEMOD); then
-  mkdir -p $CACHEMODPATH
-fi
 
 mkdir -p $MODPATH/system/lib/soundfx 2>/dev/null
 mkdir -p $MODPATH/system/etc 2>/dev/null
@@ -316,25 +296,18 @@ fi
 CONFIG_FILE=$MODPATH/system/etc/audio_effects.conf
 HTC_CONFIG_FILE=$MODPATH/system/etc/htc_audio_effects.conf
 VENDOR_CONFIG=$MODPATH/system/vendor/etc/audio_effects.conf
-#HTC_VENDOR=/vendor/etc/audio_effects.conf
 
 if [ -f "$CONFIG_FILE" ]; then
-  sed -i '/v4a_fx {/,/}/d' $CONFIG_FILE
-  sed -i '/v4a_standard_fx {/,/}/d' $CONFIG_FILE
   sed -i 's/^libraries {/libraries {\n  v4a_fx {\n    path \/system\/lib\/soundfx\/libv4a_fx_ics.so\n  }/g' $CONFIG_FILE
   sed -i 's/^effects {/effects {\n  v4a_standard_fx {\n    library v4a_fx\n    uuid 41d3c987-e6cf-11e3-a88a-11aba5d5c51b\n  }/g' $CONFIG_FILE
 fi
 
 if [ -f "$HTC_CONFIG_FILE" ]; then
-  sed -i '/v4a_fx {/,/}/d' $HTC_CONFIG_FILE
-  sed -i '/v4a_standard_fx {/,/}/d' $HTC_CONFIG_FILE
   sed -i 's/^libraries {/libraries {\n  v4a_fx {\n    path \/system\/lib\/soundfx\/libv4a_fx_ics.so\n  }/g' $HTC_CONFIG_FILE
   sed -i 's/^effects {/effects {\n  v4a_standard_fx {\n    library v4a_fx\n    uuid 41d3c987-e6cf-11e3-a88a-11aba5d5c51b\n  }/g' $HTC_CONFIG_FILE
 fi
 
 if [ -f "$VENDOR_CONFIG" ]; then
-  sed -i '/v4a_fx {/,/}/d' $VENDOR_CONFIG
-  sed -i '/v4a_standard_fx {/,/}/d' $VENDOR_CONFIG
   sed -i 's/^libraries {/libraries {\n  v4a_fx {\n    path \/system\/lib\/soundfx\/libv4a_fx_ics.so\n  }/g' $VENDOR_CONFIG
   sed -i 's/^effects {/effects {\n  v4a_standard_fx {\n    library v4a_fx\n    uuid 41d3c987-e6cf-11e3-a88a-11aba5d5c51b\n  }/g' $VENDOR_CONFIG
 fi
@@ -342,20 +315,6 @@ fi
 # deep_buffer & raw removal in audio_policy.conf for max compatibility
 # Only use "setporp audio.deep_buffer.media false" in post-fs-data.sh
 # is not enough to get v4a process with SoundCloud
-<<COMMENT_HTC_VENDOR
-if [ -f "$HTC_VENDOR" ]; then
-  mkdir -p $MODPATH/vendor/etc
-  cp -af $HTC_VENDOR $MODPATH$HTC_VENDOR
-  sed -i '/v4a_fx {/,/}/d' $MODPATH$HTC_VENDOR
-  sed -i '/v4a_standard_fx {/,/}/d' $MODPATH$HTC_VENDOR
-  sed -i 's/^libraries {/libraries {\n  v4a_fx {\n    path \/system\/lib\/soundfx\/libv4a_fx_ics.so\n  }/g' $MODPATH$HTC_VENDOR
-  sed -i 's/^effects {/effects {\n  v4a_standard_fx {\n    library v4a_fx\n    uuid 41d3c987-e6cf-11e3-a88a-11aba5d5c51b\n  }/g' $MODPATH$HTC_VENDOR
-fi
-COMMENT_HTC_VENDOR
-
-
-# deep_buffer & raw removal in audio_policy for more compatibility
-# use "setporp audio.deep_buffer.media false" in post-fs-data.sh
 if [ -f "/system/etc/audio_policy.conf" ]; then
   cp -af /system/etc/audio_policy.conf $MODPATH/system/etc/audio_policy.conf
   sed -i '/deep_buffer {/,/}/d' $MODPATH/system/etc/audio_policy.conf
@@ -374,33 +333,6 @@ if [ -f "/system/vendor/etc/audio_output_policy.conf" ]; then
   sed -i '/raw {/,/}/d' $MODPATH/system/vendor/etc/audio_output_policy.conf
 fi
 
-<<COMMENT_VENDOR_POLICY
-if [ -f "/vendor/etc/audio_policy.conf" ]; then
-  cp -af /vendor/etc/audio_policy.conf $MODPATH/vendor/etc/audio_policy.conf
-  sed -i '/deep_buffer {/,/}/d' $MODPATH/vendor/etc/audio_policy.conf
-  sed -i '/raw {/,/}/d' $MODPATH/vendor/etc/audio_policy.conf
-fi
-COMMENT_VENDOR_POLICY
-
-
-# DISABLED
-<<COMMENT_BP
-# build.prop patch for ViPER|Audio™ Stock
-BP=/system/build.prop
-mkdir -p $CACHEMODPATH/system
-cp -af $BP $CACHEMODPATH$BP
-echo " " >> $CACHEMODPATH$BP
-echo "## ViPER|Audio™ ##" >> $CACHEMODPATH$BP
-echo " " >> $CACHEMODPATH$BP
-for mod in $INSTALLER/misc;do
-  for prop in `cat $mod`;do
-    export newprop=$(echo ${prop} | cut -d '=' -f1)
-    sed -i "/${newprop}/d" $CACHEMODPATH$BP
-    echo $prop >> $CACHEMODPATH$BP
-  done
-done
-COMMENT_BP
-
 # Handle replace folders
 for TARGET in $REPLACE; do
   mktouch $MODPATH$TARGET/.replace
@@ -409,9 +341,6 @@ done
 # Auto Mount
 if ($AUTOMOUNT); then
   mktouch $MODPATH/auto_mount
-  if ($CACHEMOD); then
-    mktouch $CACHEMODPATH/auto_mount
-  fi
 fi
 
 # Module info
@@ -428,14 +357,12 @@ if ($CACHEMOD) && ($POSTFS); then
 fi
 
 # post-fs-data mode scripts
-#if (! $CACHEMOD) && ($POSTFSDATA); then
-if ($POSTFSDATA); then
+if (! $CACHEMOD) && ($POSTFSDATA); then
   cp -af $INSTALLER/common/post-fs-data.sh $MODPATH/post-fs-data.sh
 fi
 
 # service mode scripts
-#if (! $CACHEMOD) && ($LATESTARTSERVICE); then
-if ($LATESTARTSERVICE); then
+if (! $CACHEMOD) && ($LATESTARTSERVICE); then
   cp -af $INSTALLER/common/service.sh $MODPATH/service.sh
 fi
 
@@ -444,7 +371,7 @@ set_permissions
 
 ui_print "- Unmounting partitions"
 
-#if (! $CACHEMOD); then
+if (! $CACHEMOD); then
   umount $MOUNTPATH
   losetup -d $LOOPDEVICE
   rm -rf $MOUNTPATH
@@ -455,16 +382,12 @@ ui_print "- Unmounting partitions"
     ui_print "- Shrinking $IMG to ${NEWDATASIZE}M...";
     resize2fs $IMG ${NEWDATASIZE}M;
   fi
-#fi
+fi
 
 if (! $BOOTMODE); then
   umount /system
   umount /vendor 2>/dev/null
 fi
-
-rm -rf $INSTALLER
-rm -rf $TMPDIR/dap
-rm -rf $TMPDIR/dax
 
 ui_print "- Done"
 exit 0
