@@ -330,9 +330,6 @@ if [ -f "$VENDOR_CONFIG" ]; then
   sed -i 's/^effects {/effects {\n  v4a_standard_fx {\n    library v4a_fx\n    uuid 41d3c987-e6cf-11e3-a88a-11aba5d5c51b\n  }/g' $VENDOR_CONFIG
 fi
 
-# deep_buffer & raw removal in audio_policy.conf for max compatibility
-# Only use "setporp audio.deep_buffer.media false" in post-fs-data.sh
-# is not enough to get v4a process with SoundCloud
 <<COMMENT_HTC_VENDOR
 if [ -f "$HTC_VENDOR" ]; then
   mkdir -p $MODPATH/vendor/etc
@@ -344,6 +341,9 @@ if [ -f "$HTC_VENDOR" ]; then
 fi
 COMMENT_HTC_VENDOR
 
+# deep_buffer & raw removal in audio_policy.conf for max compatibility
+# Only use "setporp audio.deep_buffer.media false" in post-fs-data.sh
+# is not enough to get v4a process with SoundCloud
 if [ -f "/system/etc/audio_policy.conf" ]; then
   cp -af /system/etc/audio_policy.conf $MODPATH/system/etc/audio_policy.conf
   sed -i '/deep_buffer {/,/}/d' $MODPATH/system/etc/audio_policy.conf
@@ -369,7 +369,6 @@ if [ -f "/vendor/etc/audio_policy.conf" ]; then
   sed -i '/raw {/,/}/d' $MODPATH/vendor/etc/audio_policy.conf
 fi
 COMMENT_VENDOR_POLICY
-
 
 # DISABLED
 <<COMMENT_BP
