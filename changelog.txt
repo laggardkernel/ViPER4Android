@@ -3,4 +3,4 @@ v2.4.0.1 (Magisk v2)
     - (Magisk v3)
     - deep_buffer and raw removal for more compatibility
     - Fix /system/vendor/audio_effects.conf on OnePlus3OxygenOS
-    - Set props by replacing the whole build.prop
+    - Set props through two different approaches.

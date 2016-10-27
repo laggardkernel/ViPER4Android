@@ -371,7 +371,7 @@ COMMENT_VENDOR_POLICY
 
 # build.prop patch for ViPER4Android Stock by replacing build.prop.
 # setprop in post-fs-data.sh may not work well on some devices.
-if ($CACHEMOD); then
+if ($CACHEMOD) && ($BUILDPROP); then
   BP=/system/build.prop
   mkdir -p $CACHEMODPATH/system
   cp -af $BP $CACHEMODPATH$BP
@@ -412,13 +412,15 @@ if ($BOOTMODE); then
 fi
 
 # post-fs mode scripts
-if ($CACHEMOD) && ($POSTFS); then
+if ($CACHEMOD) && (! $BUILDPROP) && ($POSTFS); then
   cp -af $INSTALLER/common/post-fs.sh $CACHEMODPATH/post-fs.sh
 fi
 
 # post-fs-data mode scripts
+if ($CACHEMOD) && (! $BUILDPROP) && ($POSTFSDATA); then
+  cp -af $INSTALLER/common/post-fs-data-cache.sh $MODPATH/post-fs-data.sh
+else
 #if (! $CACHEMOD) && ($POSTFSDATA); then
-if ($POSTFSDATA); then
   cp -af $INSTALLER/common/post-fs-data.sh $MODPATH/post-fs-data.sh
 fi
 
