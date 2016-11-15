@@ -5,5 +5,4 @@ Use tweaks on v4a-Magisk for more compatibility.
 
 1.deep_buffer and raw removal for more compatibility.
 2.Fix broken /system/vendor/etc/audio_effects.conf on OnePlus3Oxygen.
-3.Use "CACHEMOD=true" to setprops by post-fs.sh or post-fs-data.sh, or
-4.Use "BUILDPROP=true"to setprops by replacing build.prop.
+3.Set props by resetprop, which is introduced in Magisk v9.

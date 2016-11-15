@@ -1,6 +1,10 @@
-v2.4.0.1 (Magisk v2)
+v2.4.0.1
+    - v1
     - Add Nougat SELinux patch
-    - (Magisk v3)
+    - v2
     - deep_buffer and raw removal for more compatibility
     - Fix /system/vendor/audio_effects.conf on OnePlus3OxygenOS
     - Set props through two different approaches.
+    - v3
+    - rebuild to compatiblize with Magisk v9, set props by resetprop method.
+    -

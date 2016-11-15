@@ -31,9 +31,6 @@
 
 # NOTE: This part has to be adjusted to fit your own needs
 
-# Is this a cache mod?
-CACHEMOD=true
-
 # This will be the folder name under /magisk or /cache/magisk
 # This should also be the same as the id in your module.prop to prevent confusion
 MODID=v4a
@@ -42,17 +39,10 @@ MODID=v4a
 # Most mods would like it to be enabled
 AUTOMOUNT=true
 
-# Set to true if you need post-fs script (Only available in cache mods)
-POSTFS=true
-
-# Set to true if you need replacing build.prop (Only available in cache mods)
-# If setprop during post-fs and post-fs-data doesn't work, switch this on.
-BUILDPROP=false
-
-# Set to true if you need post-fs-data script (Both available in cache and non-cache mods)
+# Set to true if you need post-fs-data script
 POSTFSDATA=true
 
-# Set to true if you need late_start service script (Both available in cache and non-cache mods)
+# Set to true if you need late_start service script
 LATESTARTSERVICE=false
 
 ##########################################################################################
@@ -83,7 +73,7 @@ REPLACE="
 /system/framework
 "
 
-# Construct your own list
+# Construct your own list here
 REPLACE="
 "
 

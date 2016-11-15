@@ -7,7 +7,7 @@
 ui_print() {
   if ($BOOTMODE); then
     echo "$1"
-  else
+  else 
     echo -n -e "ui_print $1\n" >> /proc/self/fd/$OUTFD
     echo -n -e "ui_print\n" >> /proc/self/fd/$OUTFD
   fi
@@ -148,13 +148,11 @@ fi
 TMPDIR=/tmp
 MOUNTPATH=/magisk
 IMGNAME=magisk.img
-CACHEPATH=/cache/magisk
 
 if ($BOOTMODE); then
   TMPDIR=/dev/tmp
   MOUNTPATH=/dev/magisk_merge
   IMGNAME=magisk_merge.img
-  CACHEPATH=/cache/magisk_merge
 fi
 
 mkdir -p $TMPDIR 2>/dev/null
@@ -167,11 +165,6 @@ if [ ! -f "config.sh" ]; then
 fi
 
 source config.sh
-
-if ($CACHEMOD); then
-#  MOUNTPATH=$CACHEPATH
-  CACHEMODPATH=$CACHEPATH/$MODID
-fi
 
 INSTALLER=$TMPDIR/$MODID
 MODPATH=$MOUNTPATH/$MODID
@@ -234,59 +227,52 @@ if [ "$ARCH" = "x86" -o "$ARCH" = "x64" ]; then
   LIB=$INSTALLER/libv4a_fx_jb_X86.so
 fi
 
-#if (! $CACHEMOD); then
-  IMG=
-  if (is_mounted /data); then
-    IMG=/data/$IMGNAME
-    if [ ! -f "/data/magisk.img" ]; then
-      ui_print "! Magisk is not installed!"
-      ui_print "! Magisk is required for this mod!"
-      exit 1
-    fi
-  else
-    IMG=/cache/magisk.img
-    ui_print " "
-    ui_print "***********************************"
-    ui_print "*      !! Data unavalible !!      *"
-    ui_print "* Magisk detection is impossible  *"
-    ui_print "* Installation will still proceed *"
-    ui_print "*  But please make sure you have  *"
-    ui_print "*        Magisk installed!!       *"
-    ui_print "***********************************"
-    ui_print " "
-  fi
-
-  payload_size_check "$ZIP" "*"
-
-  if [ -f "$IMG" ]; then
-    ui_print "- $IMG detected!"
-    target_size_check $IMG
-    if [ "$reqSizeM" -gt "$curFreeM" ]; then
-      SIZE=$((((reqSizeM + curUsedM) / 32 + 2) * 32))
-      ui_print "- Resizing $IMG to ${SIZE}M..."
-      resize2fs $IMG ${SIZE}M
-    fi
-  else
-    SIZE=$(((reqSizeM / 32 + 2) * 32));
-    ui_print "- Creating $IMG with size ${SIZE}M"
-    make_ext4fs -l ${SIZE}M -a /magisk -S $INSTALLER/common/file_contexts_image $IMG
-  fi
-
-  mount_image $IMG $MOUNTPATH
-  if (! is_mounted $MOUNTPATH); then
-    ui_print "! $IMG mount failed... abort"
+IMG=
+if (is_mounted /data); then
+  IMG=/data/$IMGNAME
+  if [ ! -f "/data/magisk.img" ]; then
+    ui_print "! Magisk is not installed!"
+    ui_print "! Magisk is required for this mod!"
     exit 1
   fi
-#fi
+else
+  IMG=/cache/magisk.img
+  ui_print " "
+  ui_print "***********************************"
+  ui_print "*      !! Data unavailible !!     *"
+  ui_print "* Magisk detection is impossible  *"
+  ui_print "* Installation will still proceed *"
+  ui_print "*  But please make sure you have  *"
+  ui_print "*        Magisk installed!!       *"
+  ui_print "***********************************"
+  ui_print " "
+fi
+
+payload_size_check "$ZIP" "*"
+
+if [ -f "$IMG" ]; then
+  ui_print "- $IMG detected!"
+  target_size_check $IMG
+  if [ "$reqSizeM" -gt "$curFreeM" ]; then
+    SIZE=$((((reqSizeM + curUsedM) / 32 + 2) * 32))
+    ui_print "- Resizing $IMG to ${SIZE}M..."
+    resize2fs $IMG ${SIZE}M
+  fi
+else
+  SIZE=$(((reqSizeM / 32 + 2) * 32));
+  ui_print "- Creating $IMG with size ${SIZE}M"
+  make_ext4fs -l ${SIZE}M -a /magisk -S $INSTALLER/common/file_contexts_image $IMG
+fi
+
+mount_image $IMG $MOUNTPATH
+if (! is_mounted $MOUNTPATH); then
+  ui_print "! $IMG mount failed... abort"
+  exit 1
+fi
 
 # Create mod paths
 rm -rf $MODPATH
 mkdir -p $MODPATH
-
-rm -rf $CACHEMODPATH
-if ($CACHEMOD); then
-  mkdir -p $CACHEMODPATH
-fi
 
 mkdir -p $MODPATH/system/lib/soundfx 2>/dev/null
 mkdir -p $MODPATH/system/etc 2>/dev/null
@@ -369,6 +355,7 @@ if [ -f "/vendor/etc/audio_policy.conf" ]; then
 fi
 COMMENT_VENDOR_POLICY
 
+<<COMMENT_BUILD_PROP
 # build.prop patch for ViPER4Android Stock by replacing build.prop.
 # setprop in post-fs-data.sh may not work well on some devices.
 if ($CACHEMOD) && ($BUILDPROP); then
@@ -386,6 +373,7 @@ if ($CACHEMOD) && ($BUILDPROP); then
     done
   done
 fi
+COMMENT_BUILD_PROP
 
 # Handle replace folders
 for TARGET in $REPLACE; do
@@ -395,37 +383,22 @@ done
 # Auto Mount
 if ($AUTOMOUNT); then
   mktouch $MODPATH/auto_mount
-  if ($CACHEMOD); then
-    mktouch $CACHEMODPATH/auto_mount
-  fi
 fi
 
 # Module info
 cp -af $INSTALLER/module.prop $MODPATH/module.prop
-if ($CACHEMOD); then
-  cp -af $INSTALLER/module.prop $CACHEMODPATH/module.prop
-fi
 if ($BOOTMODE); then
   # Update info for Magisk Manager
   mktouch /magisk/$MODID/update
   cp -af $INSTALLER/module.prop /magisk/$MODID/module.prop
 fi
 
-# post-fs mode scripts
-if ($CACHEMOD) && (! $BUILDPROP) && ($POSTFS); then
-  cp -af $INSTALLER/common/post-fs.sh $CACHEMODPATH/post-fs.sh
-fi
-
 # post-fs-data mode scripts
-if ($CACHEMOD) && (! $BUILDPROP) && ($POSTFSDATA); then
-  cp -af $INSTALLER/common/post-fs-data-cache.sh $MODPATH/post-fs-data.sh
-else
-#if (! $CACHEMOD) && ($POSTFSDATA); then
+if ($POSTFSDATA); then
   cp -af $INSTALLER/common/post-fs-data.sh $MODPATH/post-fs-data.sh
 fi
 
 # service mode scripts
-#if (! $CACHEMOD) && ($LATESTARTSERVICE); then
 if ($LATESTARTSERVICE); then
   cp -af $INSTALLER/common/service.sh $MODPATH/service.sh
 fi
@@ -435,27 +408,21 @@ set_permissions
 
 ui_print "- Unmounting partitions"
 
-#if (! $CACHEMOD); then
-  umount $MOUNTPATH
-  losetup -d $LOOPDEVICE
-  rm -rf $MOUNTPATH
-  # Shrink the image if possible
-  target_size_check $IMG
-  NEWDATASIZE=$(((curUsedM / 32 + 2) * 32));
-  if [ "$curSizeM" -gt "$NEWDATASIZE" ]; then
-    ui_print "- Shrinking $IMG to ${NEWDATASIZE}M...";
-    resize2fs $IMG ${NEWDATASIZE}M;
-  fi
-#fi
+umount $MOUNTPATH
+losetup -d $LOOPDEVICE
+rm -rf $MOUNTPATH
+# Shrink the image if possible
+target_size_check $IMG
+NEWDATASIZE=$(((curUsedM / 32 + 2) * 32));
+if [ "$curSizeM" -gt "$NEWDATASIZE" ]; then
+  ui_print "- Shrinking $IMG to ${NEWDATASIZE}M...";
+  resize2fs $IMG ${NEWDATASIZE}M;
+fi
 
 if (! $BOOTMODE); then
   umount /system
   umount /vendor 2>/dev/null
 fi
-
-rm -rf $INSTALLER
-rm -rf $TMPDIR/dap
-rm -rf $TMPDIR/dax
 
 ui_print "- Done"
 exit 0
