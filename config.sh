@@ -45,6 +45,16 @@ POSTFSDATA=true
 # Set to true if you need late_start service script
 LATESTARTSERVICE=false
 
+VERSION="2.4.0.1"
+
+# FILE LOCATIONS
+CONFIG_FILE=/system/etc/audio_effects.conf
+HTC_CONFIG_FILE=/system/etc/htc_audio_effects.conf
+VENDOR_CONFIG=/system/vendor/etc/audio_effects.conf
+OTHER_VENDOR_FILE=/system/etc/audio_effects_vendor.conf
+OFFLOAD_CONFIG=/system/etc/audio_effects_offload.conf
+#HTC_VENDOR=/vendor/etc/audio_effects.conf
+
 ##########################################################################################
 # Installation Message
 ##########################################################################################
@@ -53,7 +63,9 @@ LATESTARTSERVICE=false
 
 print_modname() {
   ui_print "*******************************"
-  ui_print "ViPER4Android (Magisk Version) "
+  ui_print "     ViPER4Android (Magisk)    "
+  ui_print "           v$VERSION           "
+  ui_print "  Magisk Mod by laggardkernel  "
   ui_print "*******************************"
 }
 

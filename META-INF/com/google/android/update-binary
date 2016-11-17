@@ -169,10 +169,8 @@ source config.sh
 INSTALLER=$TMPDIR/$MODID
 MODPATH=$MOUNTPATH/$MODID
 
-# Delete existing audio mod in case of collision coz of mod of confs
+# Delete existing temporary files
 rm -rf $INSTALLER
-rm -rf $TMPDIR/dap
-rm -rf $TMPDIR/dax
 
 mkdir -p $INSTALLER
 cd $INSTALLER
@@ -281,39 +279,111 @@ mkdir -p $MODPATH/system/vendor/etc 2>/dev/null
 # Copy files
 ui_print "- Copying files"
 cp -af $LIB $MODPATH/system/lib/soundfx/libv4a_fx_ics.so
-cp -af /system/etc/audio_effects.conf $MODPATH/system/etc/audio_effects.conf 2>/dev/null
-cp -af /system/etc/htc_audio_effects.conf $MODPATH/system/etc/htc_audio_effects.conf 2>/dev/null
-# Specific fix for OnePlus3Oxygen on /system/vendor/audio_effects.conf
-if (! $FIXVENDORCONF); then
-  cp -af /system/vendor/etc/audio_effects.conf $MODPATH/system/vendor/etc/audio_effects.conf 2>/dev/null
+
+cp -af $CONFIG_FILE $MODPATH$CONFIG_FILE 2>/dev/null
+#cp -af $HTC_CONFIG_FILE $MODPATH$HTC_CONFIG_FILE 2>/dev/null
+cp -af $VENDOR_CONFIG $MODPATH$VENDOR_CONFIG 2>/dev/null
+cp -af $OTHER_VENDOR_FILE $MODPATH$OTHER_VENDOR_FILE 2>/dev/null
+cp -af $OFFLOAD_CONFIG $MODPATH$OFFLOAD_CONFIG 2>/dev/null
+
+# Specific fix for OnePlus3Oxygen on /system/vendor/etc/audio_effects.conf
+ui_print "  Fixing audio_effects for OnePlus3Oxygen"
+if [ "$ONEPLUSROM" = "OnePlus3Oxygen" ]; then
+  cp -af $VENDOR_CONFIG $MODPATH$VENDOR_CONFIG 2>/dev/null
 else
-  cp -af /system/etc/audio_effects.conf $MODPATH/system/vendor/etc/audio_effects.conf 2>/dev/null
+  cp -af $CONFIG_FILE $MODPATH$VENDOR_CONFIG 2>/dev/null
 fi
 
-CONFIG_FILE=$MODPATH/system/etc/audio_effects.conf
-HTC_CONFIG_FILE=$MODPATH/system/etc/htc_audio_effects.conf
-VENDOR_CONFIG=$MODPATH/system/vendor/etc/audio_effects.conf
-#HTC_VENDOR=/vendor/etc/audio_effects.conf
-
-if [ -f "$CONFIG_FILE" ]; then
-  sed -i '/v4a_fx {/,/}/d' $CONFIG_FILE
-  sed -i '/v4a_standard_fx {/,/}/d' $CONFIG_FILE
-  sed -i 's/^libraries {/libraries {\n  v4a_fx {\n    path \/system\/lib\/soundfx\/libv4a_fx_ics.so\n  }/g' $CONFIG_FILE
-  sed -i 's/^effects {/effects {\n  v4a_standard_fx {\n    library v4a_fx\n    uuid 41d3c987-e6cf-11e3-a88a-11aba5d5c51b\n  }/g' $CONFIG_FILE
+# Add libraries and effects
+ui_print "- Adding libs and effects"
+if [ -f "$MODPATH$CONFIG_FILE" ]; then
+  # ViPER4Android
+  sed -i '/v4a_fx {/,/}/d' $MODPATH$CONFIG_FILE
+  sed -i '/v4a_standard_fx {/,/}/d' $MODPATH$CONFIG_FILE
+  sed -i 's/^libraries {/libraries {\n  v4a_fx {\n    path \/system\/lib\/soundfx\/libv4a_fx_ics.so\n  }/g' $MODPATH$CONFIG_FILE
+  sed -i 's/^effects {/effects {\n  v4a_standard_fx {\n    library v4a_fx\n    uuid 41d3c987-e6cf-11e3-a88a-11aba5d5c51b\n  }/g' $MODPATH$CONFIG_FILE
+  # Dolby Atmos
+  #sed -i 'H;1h;$!d;x; s/[[:blank:]]*dax {[^{}]*\({[^}]*}[^{}]*\)*}[[:blank:]]*\n//g' $MODPATH$CONFIG_FILE
+  #sed -i '/dax {/,/}/d' $MODPATH$CONFIG_FILE
+  #sed -i '/dax_sw {/,/}/d' $MODPATH$CONFIG_FILE
+  #sed -i '/dax_hw {/,/}/d' $MODPATH$CONFIG_FILE
+  #if [ "$ONEPLUSROM" = "OnePlus3Oxygen" ]; then
+  #  sed -i '/ds_sw {/,/}/d' $MODPATH$CONFIG_FILE
+  #  sed -i '/ds_hw {/,/}/d' $MODPATH$CONFIG_FILE
+  #  sed -i '/DOLBY_DAP/,/DOLBY_END/d' $MODPATH$CONFIG_FILE
+  #fi
+  #sed -i '/ds {/,/}/d' $MODPATH$CONFIG_FILE
+  #sed -i 's/^libraries {/libraries {\n  dax {\n    path \/system\/lib\/soundfx\/libswdax.so\n  }/g' $MODPATH$CONFIG_FILE
+  #sed -i 's/^effects {/effects {\n  dax {\n    library dax\n    uuid 9d4921da-8225-4f29-aefa-6e6f69726861\n  }/g' $MODPATH$CONFIG_FILE
 fi
 
-if [ -f "$HTC_CONFIG_FILE" ]; then
-  sed -i '/v4a_fx {/,/}/d' $HTC_CONFIG_FILE
-  sed -i '/v4a_standard_fx {/,/}/d' $HTC_CONFIG_FILE
-  sed -i 's/^libraries {/libraries {\n  v4a_fx {\n    path \/system\/lib\/soundfx\/libv4a_fx_ics.so\n  }/g' $HTC_CONFIG_FILE
-  sed -i 's/^effects {/effects {\n  v4a_standard_fx {\n    library v4a_fx\n    uuid 41d3c987-e6cf-11e3-a88a-11aba5d5c51b\n  }/g' $HTC_CONFIG_FILE
+if [ -f "$MODPATH$VENDOR_CONFIG" ]; then
+  # ViPER4Android
+  sed -i '/v4a_fx {/,/}/d' $MODPATH$VENDOR_CONFIG
+  sed -i '/v4a_standard_fx {/,/}/d' $MODPATH$VENDOR_CONFIG
+  sed -i 's/^libraries {/libraries {\n  v4a_fx {\n    path \/system\/lib\/soundfx\/libv4a_fx_ics.so\n  }/g' $MODPATH$VENDOR_CONFIG
+  sed -i 's/^effects {/effects {\n  v4a_standard_fx {\n    library v4a_fx\n    uuid 41d3c987-e6cf-11e3-a88a-11aba5d5c51b\n  }/g' $MODPATH$VENDOR_CONFIG
+  # Dolby Atmos
+  #sed -i 'H;1h;$!d;x; s/[[:blank:]]*dax {[^{}]*\({[^}]*}[^{}]*\)*}[[:blank:]]*\n//g' $MODPATH$VENDOR_CONFIG
+  #sed -i '/dax {/,/}/d' $MODPATH$VENDOR_CONFIG
+  #sed -i '/dax_sw {/,/}/d' $MODPATH$VENDOR_CONFIG
+  #sed -i '/dax_hw {/,/}/d' $MODPATH$VENDOR_CONFIG
+  #if [ "$ONEPLUSROM" = "OnePlus3Oxygen" ]; then
+  #  sed -i '/ds_sw {/,/}/d' $MODPATH$VENDOR_CONFIG
+  #  sed -i '/ds_hw {/,/}/d' $MODPATH$VENDOR_CONFIG
+  #  sed -i '/DOLBY_DAP/,/DOLBY_END/d' $MODPATH$VENDOR_CONFIG
+  #fi
+  #sed -i '/ds {/,/}/d' $MODPATH$VENDOR_CONFIG
+  #sed -i 's/^libraries {/libraries {\n  dax {\n    path \/system\/lib\/soundfx\/libswdax.so\n  }/g' $MODPATH$VENDOR_CONFIG
+  #sed -i 's/^effects {/effects {\n  dax {\n    library dax\n    uuid 9d4921da-8225-4f29-aefa-6e6f69726861\n  }/g' $MODPATH$VENDOR_CONFIG
 fi
 
-if [ -f "$VENDOR_CONFIG" ]; then
-  sed -i '/v4a_fx {/,/}/d' $VENDOR_CONFIG
-  sed -i '/v4a_standard_fx {/,/}/d' $VENDOR_CONFIG
-  sed -i 's/^libraries {/libraries {\n  v4a_fx {\n    path \/system\/lib\/soundfx\/libv4a_fx_ics.so\n  }/g' $VENDOR_CONFIG
-  sed -i 's/^effects {/effects {\n  v4a_standard_fx {\n    library v4a_fx\n    uuid 41d3c987-e6cf-11e3-a88a-11aba5d5c51b\n  }/g' $VENDOR_CONFIG
+if [ -f "$MODPATH$HTC_CONFIG_FILE" ]; then
+  # ViPER4Android
+  sed -i '/v4a_fx {/,/}/d' $MODPATH$HTC_CONFIG_FILE
+  sed -i '/v4a_standard_fx {/,/}/d' $MODPATH$HTC_CONFIG_FILE
+  sed -i 's/^libraries {/libraries {\n  v4a_fx {\n    path \/system\/lib\/soundfx\/libv4a_fx_ics.so\n  }/g' $MODPATH$HTC_CONFIG_FILE
+  sed -i 's/^effects {/effects {\n  v4a_standard_fx {\n    library v4a_fx\n    uuid 41d3c987-e6cf-11e3-a88a-11aba5d5c51b\n  }/g' $MODPATH$HTC_CONFIG_FILE
+  # Dolby Atmos
+  #sed -i 'H;1h;$!d;x; s/[[:blank:]]*dax {[^{}]*\({[^}]*}[^{}]*\)*}[[:blank:]]*\n//g' $MODPATH$HTC_CONFIG_FILE
+  #sed -i '/dax {/,/}/d' $MODPATH$HTC_CONFIG_FILE
+  #sed -i '/dax_sw {/,/}/d' $MODPATH$HTC_CONFIG_FILE
+  #sed -i '/dax_hw {/,/}/d' $MODPATH$HTC_CONFIG_FILE
+  #sed -i '/ds {/,/}/d' $MODPATH$HTC_CONFIG_FILE
+  #sed -i 's/^libraries {/libraries {\n  dax {\n    path \/system\/lib\/soundfx\/libswdax.so\n  }/g' $MODPATH$HTC_CONFIG_FILE
+  #sed -i 's/^effects {/effects {\n  dax {\n    library dax\n    uuid 9d4921da-8225-4f29-aefa-6e6f69726861\n  }/g' $MODPATH$HTC_CONFIG_FILE
+fi
+
+if [ -f "$MODPATH$OTHER_VENDOR_FILE" ]; then
+  # ViPER4Android
+  sed -i '/v4a_fx {/,/}/d' $MODPATH$OTHER_VENDOR_FILE
+  sed -i '/v4a_standard_fx {/,/}/d' $MODPATH$OTHER_VENDOR_FILE
+  sed -i 's/^libraries {/libraries {\n  v4a_fx {\n    path \/system\/lib\/soundfx\/libv4a_fx_ics.so\n  }/g' $MODPATH$OTHER_VENDOR_FILE
+  sed -i 's/^effects {/effects {\n  v4a_standard_fx {\n    library v4a_fx\n    uuid 41d3c987-e6cf-11e3-a88a-11aba5d5c51b\n  }/g' $MODPATH$OTHER_VENDOR_FILE
+  # Dolby Atmos
+  #sed -i 'H;1h;$!d;x; s/[[:blank:]]*dax {[^{}]*\({[^}]*}[^{}]*\)*}[[:blank:]]*\n//g' $MODPATH$OTHER_VENDOR_FILE
+  #sed -i '/dax {/,/}/d' $MODPATH$OTHER_VENDOR_FILE
+  #sed -i '/dax_sw {/,/}/d' $MODPATH$OTHER_VENDOR_FILE
+  #sed -i '/dax_hw {/,/}/d' $MODPATH$OTHER_VENDOR_FILE
+  #sed -i '/ds {/,/}/d' $MODPATH$OTHER_VENDOR_FILE
+  #sed -i 's/^libraries {/libraries {\n  dax {\n    path \/system\/lib\/soundfx\/libswdax.so\n  }/g' $MODPATH$OTHER_VENDOR_FILE
+  #sed -i 's/^effects {/effects {\n  dax {\n    library dax\n    uuid 9d4921da-8225-4f29-aefa-6e6f69726861\n  }/g' $MODPATH$OTHER_VENDOR_FILE
+fi
+
+if [ -f "$MODPATH$OFFLOAD_CONFIG" ]; then
+  # ViPER4Android
+  sed -i '/v4a_fx {/,/}/d' $MODPATH$OFFLOAD_CONFIG
+  sed -i '/v4a_standard_fx {/,/}/d' $MODPATH$OFFLOAD_CONFIG
+  sed -i 's/^libraries {/libraries {\n  v4a_fx {\n    path \/system\/lib\/soundfx\/libv4a_fx_ics.so\n  }/g' $MODPATH$OFFLOAD_CONFIG
+  sed -i 's/^effects {/effects {\n  v4a_standard_fx {\n    library v4a_fx\n    uuid 41d3c987-e6cf-11e3-a88a-11aba5d5c51b\n  }/g' $MODPATH$OFFLOAD_CONFIG
+  # Dolby Atmos
+  #sed -i 'H;1h;$!d;x; s/[[:blank:]]*dax {[^{}]*\({[^}]*}[^{}]*\)*}[[:blank:]]*\n//g' $MODPATH$OFFLOAD_CONFIG
+  #sed -i '/dax {/,/}/d' $MODPATH$OFFLOAD_CONFIG
+  #sed -i '/dax_sw {/,/}/d' $MODPATH$OFFLOAD_CONFIG
+  #sed -i '/dax_hw {/,/}/d' $MODPATH$OFFLOAD_CONFIG
+  #sed -i '/ds {/,/}/d' $MODPATH$OFFLOAD_CONFIG
+  #sed -i 's/^libraries {/libraries {\n  dax {\n    path \/system\/lib\/soundfx\/libswdax.so\n  }/g' $MODPATH$OFFLOAD_CONFIG
+  #sed -i 's/^effects {/effects {\n  dax {\n    library dax\n    uuid 9d4921da-8225-4f29-aefa-6e6f69726861\n  }/g' $MODPATH$OFFLOAD_CONFIG
 fi
 
 <<COMMENT_HTC_VENDOR
@@ -329,6 +399,7 @@ COMMENT_HTC_VENDOR
 
 # deep_buffer & raw removal in audio_policy.conf for max compatibility
 # setprop in post-fs-data.sh may not work well on some devices.
+ui_print "- Removing deep_buffer & raw 4 more compatibility"
 if [ -f "/system/etc/audio_policy.conf" ]; then
   cp -af /system/etc/audio_policy.conf $MODPATH/system/etc/audio_policy.conf
   sed -i '/deep_buffer {/,/}/d' $MODPATH/system/etc/audio_policy.conf
@@ -395,7 +466,11 @@ fi
 
 # post-fs-data mode scripts
 if ($POSTFSDATA); then
-  cp -af $INSTALLER/common/post-fs-data.sh $MODPATH/post-fs-data.sh
+  if [ "$ONEPLUSROM" = "OnePlus3Oxygen" ]; then
+    cp -af $INSTALLER/common/post-fs-data-oos.sh $MODPATH/post-fs-data.sh
+  else
+    cp -af $INSTALLER/common/post-fs-data.sh $MODPATH/post-fs-data.sh
+  fi
 fi
 
 # service mode scripts
