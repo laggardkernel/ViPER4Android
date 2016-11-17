@@ -215,7 +215,7 @@ if [ "$ABILONG" = "x86_64" ]; then ARCH=x64; IS64BIT=true; fi;
 FIXVENDORCONF=false
 ONEPLUSROM=
 ONEPLUSROM=$(cat /system/build.prop | grep "ro.build.ota.versionname=")
-ONEPLUSROM=${NAME:25:14}
+ONEPLUSROM=${ONEPLUSROM:25:14}
 if [ "$ONEPLUSROM" = "OnePlus3Oxygen" ]; then FIXVENDORCONF=true; fi;
 
 # You can get the Android API version from $API, the CPU architecture from $ARCH
@@ -287,11 +287,11 @@ cp -af $OTHER_VENDOR_FILE $MODPATH$OTHER_VENDOR_FILE 2>/dev/null
 cp -af $OFFLOAD_CONFIG $MODPATH$OFFLOAD_CONFIG 2>/dev/null
 
 # Specific fix for OnePlus3Oxygen on /system/vendor/etc/audio_effects.conf
-ui_print "  Fixing audio_effects for OnePlus3Oxygen"
 if [ "$ONEPLUSROM" = "OnePlus3Oxygen" ]; then
-  cp -af $VENDOR_CONFIG $MODPATH$VENDOR_CONFIG 2>/dev/null
-else
+  ui_print "  Fixing audio_effects for OnePlus3Oxygen"
   cp -af $CONFIG_FILE $MODPATH$VENDOR_CONFIG 2>/dev/null
+else
+  cp -af $VENDOR_CONFIG $MODPATH$VENDOR_CONFIG 2>/dev/null
 fi
 
 # Add libraries and effects

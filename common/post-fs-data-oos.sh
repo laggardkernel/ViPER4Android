@@ -10,8 +10,8 @@ MODDIR=${0%/*}
 /data/magisk/sepolicy-inject --live -s audioserver -t audioserver_tmpfs -c file -p read,write,execute
 
 # Set any prop (with trigger)
-/data/magisk/resetprop ro.audio.samplerate 48000
-/data/magisk/resetprop ro.audio.pcm.samplerate 48000
+#/data/magisk/resetprop ro.audio.samplerate 48000
+#/data/magisk/resetprop ro.audio.pcm.samplerate 48000
 /data/magisk/resetprop audio.deep_buffer.media false
 #/data/magisk/resetprop lpa.decode false
 #/data/magisk/resetprop tunnel.decode false
