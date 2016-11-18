@@ -21,21 +21,21 @@ log_print() {
 /data/magisk/sepolicy-inject --live -s audioserver -t audioserver_tmpfs -c file -p read,write,execute
 
 # v4a Android package installation
-if [ -f "/cache/ViPERFX.apk" ]; then
+if [ -f "/cache/$APKNAME" ]; then
   cp /cache/$APKNAME /data/$APKNAME
   rm /cache/$APKNAME
 fi
 if [ -f "/data/$APKNAME" ]; then
   log_print "installing $APKNAME in /data"
 
-  APKPATH=com.audlabs.viperfx-1
-  for i in `ls /data/app | grep com.audlabs.viperfx-`; do
+  APKPATH="$APKNAME"-1
+  for i in `ls /data/app | grep "$APKNAME"-`; do
     if [ `cat /data/system/packages.xml | grep $i >/dev/null 2>&1; echo $?` -eq 0 ]; then
       APKPATH=$i
       break;
     fi
   done
-  rm -rf /data/app/com.audlabs.viperfx-*
+  rm -rf /data/app/"$APKNAME"-*
 
   log_print "target path: /data/app/$APKPATH"
 

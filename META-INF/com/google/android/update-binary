@@ -293,7 +293,7 @@ cp -af $LIB $MODPATH/system/lib/soundfx/libv4a_fx_ics.so
 
 # Copy APK, installation is done by post-fs-data.sh
 if [ -f "$INSTALLER/ViPERFX.apk" ]; then
-  cp -af $INSTALLER/ViPERFX.apk /data/ViPERFX.apk
+  cp -af $INSTALLER/$APKNAME /data/$APKNAME
 fi
 
 cp -af $CONFIG_FILE $MODPATH$CONFIG_FILE 2>/dev/null

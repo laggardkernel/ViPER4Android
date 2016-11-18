@@ -46,6 +46,8 @@ POSTFSDATA=true
 LATESTARTSERVICE=true
 
 VERSION="2.5.0.5"
+APKNAME=ViPERFX.apk
+PACKAGENAME=com.audlabs.viperfx
 
 # FILE LOCATIONS
 CONFIG_FILE=/system/etc/audio_effects.conf
