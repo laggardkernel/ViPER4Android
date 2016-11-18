@@ -63,7 +63,7 @@ OFFLOAD_CONFIG=/system/etc/audio_effects_offload.conf
 
 print_modname() {
   ui_print "*******************************"
-  ui_print "     ViPER4Android (Magisk)    "
+  ui_print "        ViPERFX (Magisk)       "
   ui_print "           v$VERSION           "
   ui_print "  Magisk Mod by laggardkernel  "
   ui_print "*******************************"

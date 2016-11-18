@@ -9,3 +9,4 @@ v3
 v4
     - Update library to v2.5.0.5
     - http://www.audlabs.com/dists/ViPERFX_v2.5.0.5.apk
+    - Install ViPERFX app automatically during boot 

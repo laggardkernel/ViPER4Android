@@ -279,6 +279,10 @@ mkdir -p $MODPATH/system/vendor/etc 2>/dev/null
 # Copy files
 ui_print "- Copying files"
 cp -af $LIB $MODPATH/system/lib/soundfx/libv4a_fx_ics.so
+# Copy APK, installation is done by post-fs-data.sh
+if [ -f "$INSTALLER/ViPERFX.apk" ]; then
+  cp -af $INSTALLER/ViPERFX.apk /data/ViPERFX.apk
+fi
 
 cp -af $CONFIG_FILE $MODPATH$CONFIG_FILE 2>/dev/null
 #cp -af $HTC_CONFIG_FILE $MODPATH$HTC_CONFIG_FILE 2>/dev/null
