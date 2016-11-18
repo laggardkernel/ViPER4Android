@@ -211,12 +211,21 @@ if [ "$ABI2" = "x86" ]; then ARCH=x86; fi;
 if [ "$ABILONG" = "arm64-v8a" ]; then ARCH=arm64; IS64BIT=true; fi;
 if [ "$ABILONG" = "x86_64" ]; then ARCH=x64; IS64BIT=true; fi;
 
-# Specific fix for OnePlus3Oxygen on /system/vendor/audio_effects.conf
-FIXVENDORCONF=false
-ONEPLUSROM=
-ONEPLUSROM=$(cat /system/build.prop | grep "ro.build.ota.versionname=")
-ONEPLUSROM=${ONEPLUSROM:25:14}
-if [ "$ONEPLUSROM" = "OnePlus3Oxygen" ]; then FIXVENDORCONF=true; fi;
+# Specific fix for OnePlus3 ROMS on /system/vendor/audio_effects.conf
+# ROMs like OxygenOS, PA etc.
+# ro.build.product is obsolete; use ro.product.device
+# ro.build.product=OnePlus3
+# ro.product.device=OnePlus3
+PRODUCT=$(cat /system/build.prop | grep "ro.product.device=")
+if [ "$PRODUCT" = "" ]; then
+  PRODUCT=$(cat /system/build.prop | grep "ro.build.product=")
+  PRODUCT=${PRODUCT:17}
+else
+  PRODUCT=${PRODUCT:18}
+fi
+if [ "$PRODUCT" = "OnePlus3" ] || [ "$PRODUCT" = "oneplus3" ]; then
+  FIXVENDORCONF=true
+fi
 
 # You can get the Android API version from $API, the CPU architecture from $ARCH
 # Useful if you are creating Android version / platform dependent mods
@@ -278,7 +287,14 @@ mkdir -p $MODPATH/system/vendor/etc 2>/dev/null
 
 # Copy files
 ui_print "- Copying files"
+
+# Copy v4a lib
 cp -af $LIB $MODPATH/system/lib/soundfx/libv4a_fx_ics.so
+
+# Copy APK, installation is done by post-fs-data.sh
+if [ -f "$INSTALLER/$APKNAME" ]; then
+  cp -af $INSTALLER/$APKNAME /data/$APKNAME
+fi
 
 cp -af $CONFIG_FILE $MODPATH$CONFIG_FILE 2>/dev/null
 #cp -af $HTC_CONFIG_FILE $MODPATH$HTC_CONFIG_FILE 2>/dev/null
@@ -286,9 +302,9 @@ cp -af $VENDOR_CONFIG $MODPATH$VENDOR_CONFIG 2>/dev/null
 cp -af $OTHER_VENDOR_FILE $MODPATH$OTHER_VENDOR_FILE 2>/dev/null
 cp -af $OFFLOAD_CONFIG $MODPATH$OFFLOAD_CONFIG 2>/dev/null
 
-# Specific fix for OnePlus3Oxygen on /system/vendor/etc/audio_effects.conf
-if [ "$ONEPLUSROM" = "OnePlus3Oxygen" ]; then
-  ui_print "  Fixing audio_effects for OnePlus3Oxygen"
+# Specific fix for OnePlus3 ROMs on /system/vendor/etc/audio_effects.conf
+if [ "$PRODUCT" = "OnePlus3" ] || [ "$PRODUCT" = "oneplus3" ]; then
+  ui_print "  Fixing audio_effects for OnePlus3 ROMs"
   cp -af $CONFIG_FILE $MODPATH$VENDOR_CONFIG 2>/dev/null
 else
   cp -af $VENDOR_CONFIG $MODPATH$VENDOR_CONFIG 2>/dev/null
@@ -307,7 +323,7 @@ if [ -f "$MODPATH$CONFIG_FILE" ]; then
   #sed -i '/dax {/,/}/d' $MODPATH$CONFIG_FILE
   #sed -i '/dax_sw {/,/}/d' $MODPATH$CONFIG_FILE
   #sed -i '/dax_hw {/,/}/d' $MODPATH$CONFIG_FILE
-  #if [ "$ONEPLUSROM" = "OnePlus3Oxygen" ]; then
+  #if [ "$PRODUCT" = "OnePlus3" ] || [ "$PRODUCT" = "oneplus3" ]; then
   #  sed -i '/ds_sw {/,/}/d' $MODPATH$CONFIG_FILE
   #  sed -i '/ds_hw {/,/}/d' $MODPATH$CONFIG_FILE
   #  sed -i '/DOLBY_DAP/,/DOLBY_END/d' $MODPATH$CONFIG_FILE
@@ -328,7 +344,7 @@ if [ -f "$MODPATH$VENDOR_CONFIG" ]; then
   #sed -i '/dax {/,/}/d' $MODPATH$VENDOR_CONFIG
   #sed -i '/dax_sw {/,/}/d' $MODPATH$VENDOR_CONFIG
   #sed -i '/dax_hw {/,/}/d' $MODPATH$VENDOR_CONFIG
-  #if [ "$ONEPLUSROM" = "OnePlus3Oxygen" ]; then
+  #if [ "$PRODUCT" = "OnePlus3" ] || [ "$PRODUCT" = "oneplus3" ]; then
   #  sed -i '/ds_sw {/,/}/d' $MODPATH$VENDOR_CONFIG
   #  sed -i '/ds_hw {/,/}/d' $MODPATH$VENDOR_CONFIG
   #  sed -i '/DOLBY_DAP/,/DOLBY_END/d' $MODPATH$VENDOR_CONFIG
@@ -399,7 +415,7 @@ COMMENT_HTC_VENDOR
 
 # deep_buffer & raw removal in audio_policy.conf for max compatibility
 # setprop in post-fs-data.sh may not work well on some devices.
-ui_print "- Removing deep_buffer & raw 4 more compatibility"
+ui_print "- Removing deep_buffer & raw for more compatibility"
 if [ -f "/system/etc/audio_policy.conf" ]; then
   cp -af /system/etc/audio_policy.conf $MODPATH/system/etc/audio_policy.conf
   sed -i '/deep_buffer {/,/}/d' $MODPATH/system/etc/audio_policy.conf
@@ -466,11 +482,7 @@ fi
 
 # post-fs-data mode scripts
 if ($POSTFSDATA); then
-  if [ "$ONEPLUSROM" = "OnePlus3Oxygen" ]; then
-    cp -af $INSTALLER/common/post-fs-data-oos.sh $MODPATH/post-fs-data.sh
-  else
-    cp -af $INSTALLER/common/post-fs-data.sh $MODPATH/post-fs-data.sh
-  fi
+  cp -af $INSTALLER/common/post-fs-data.sh $MODPATH/post-fs-data.sh
 fi
 
 # service mode scripts

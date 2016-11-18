@@ -43,9 +43,11 @@ AUTOMOUNT=true
 POSTFSDATA=true
 
 # Set to true if you need late_start service script
-LATESTARTSERVICE=false
+LATESTARTSERVICE=true
 
 VERSION="2.4.0.1"
+APKNAME=ViPER4Android_FX.apk
+PACKAGENAME=com.vipercn.viper4android_v2
 
 # FILE LOCATIONS
 CONFIG_FILE=/system/etc/audio_effects.conf

@@ -2,6 +2,17 @@
 # Please don't hardcode /magisk/modname/... ; instead, please use $MODDIR/...
 # This will make your scripts compatible even if Magisk change its mount point in the future
 MODDIR=${0%/*}
+MODE="post-fs-data"
+LOGFILE=/cache/magisk.log
+APKNAME=ViPER4Android_FX.apk
+PACKAGENAME=com.vipercn.viper4android_v2
+REBOOT=false
+
+log_print() {
+  echo "v4a: $1"
+  echo "v4a: $1" >> $LOGFILE
+  log -p i -t v4a "$1"
+}
 
 # This script will be executed in post-fs-data mode
 # More info in the main Magisk thread
@@ -9,13 +20,51 @@ MODDIR=${0%/*}
 /data/magisk/sepolicy-inject --live -s mediaserver -t mediaserver_tmpfs -c file -p read,write,execute
 /data/magisk/sepolicy-inject --live -s audioserver -t audioserver_tmpfs -c file -p read,write,execute
 
-# Set any prop (with trigger)
-/data/magisk/resetprop ro.audio.samplerate 48000
-/data/magisk/resetprop ro.audio.pcm.samplerate 48000
-/data/magisk/resetprop audio.deep_buffer.media false
-/data/magisk/resetprop lpa.decode false
-/data/magisk/resetprop tunnel.decode false
-/data/magisk/resetprop tunnel.audiovideo.decode false
-/data/magisk/resetprop lpa.releaselock false
-/data/magisk/resetprop lpa.use-stagefright false
-/data/magisk/resetprop persist.sys.media.use-awesome 1
+# v4a Android package installation
+if [ -f "/cache/$APKNAME" ]; then
+  cp /cache/$APKNAME /data/$APKNAME
+  rm /cache/$APKNAME
+fi
+if [ -f "/data/$APKNAME" ]; then
+  log_print "installing $APKNAME in /data"
+
+  APKPATH="$APKNAME"-1
+  for i in `ls /data/app | grep "$APKNAME"-`; do
+    if [ `cat /data/system/packages.xml | grep $i >/dev/null 2>&1; echo $?` -eq 0 ]; then
+      APKPATH=$i
+      break;
+    fi
+  done
+  rm -rf /data/app/"$APKNAME"-*
+
+  log_print "target path: /data/app/$APKPATH"
+
+  mkdir /data/app/$APKPATH
+  chown 1000.1000 /data/app/$APKPATH
+  chmod 0755 /data/app/$APKPATH
+  chcon u:object_r:apk_data_file:s0 /data/app/$APKPATH
+
+  cp /data/$APKNAME /data/app/$APKPATH/base.apk
+  chown 1000.1000 /data/app/$APKPATH/base.apk
+  chmod 0644 /data/app/$APKPATH/base.apk
+  chcon u:object_r:apk_data_file:s0 /data/app/$APKPATH/base.apk
+
+  rm /data/$APKNAME
+
+  sync
+
+  # just in case
+  REBOOT=true
+fi
+
+# sometimes we need to reboot, make it so
+if ($REBOOT); then
+  log_print "rebooting"
+  if [ "$MODE" = "post-fs-data" ]; then
+    # avoid device freeze (reason unknown)
+    sh -c "sleep 5; reboot" &
+  else
+    reboot
+  fi
+  exit
+fi
