@@ -45,7 +45,7 @@ POSTFSDATA=true
 # Set to true if you need late_start service script
 LATESTARTSERVICE=false
 
-VERSION="2.4.0.1"
+VERSION="2.5.0.5"
 
 # FILE LOCATIONS
 CONFIG_FILE=/system/etc/audio_effects.conf

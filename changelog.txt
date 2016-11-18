@@ -1,10 +1,11 @@
-v2.4.0.1
-    - v1
+v1
     - Add Nougat SELinux patch
-    - v2
+v2
     - deep_buffer and raw removal for more compatibility
     - Fix /system/vendor/audio_effects.conf on OnePlus3OxygenOS
     - Set props through two different approaches.
-    - v3
+v3
     - rebuild to compatiblize with Magisk v9, set props by resetprop method.
-    -
+v4
+    - Update library to v2.5.0.5
+    - http://www.audlabs.com/dists/ViPERFX_v2.5.0.5.apk

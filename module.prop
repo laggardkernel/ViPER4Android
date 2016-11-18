@@ -1,9 +1,9 @@
 id=v4a
-name=ViPER4Android FX
-version=v2.4.0.1
-versionCode=3
+name=ViPERFX
+version=v2.5.0.5
+versionCode=4
 author=ViPER’s Audio
 description=Popular sound mod by ViPER’s Audio, ported to Magisk by topjohnwu, adapted by laggardkernel for more compatibility
-support=http://forum.xda-developers.com/showthread.php?t=2191223
+support=http://www.audlabs.com/download.html
 donate=http://vipersaudio.com/blog/?page_id=95
 cacheModule=false
