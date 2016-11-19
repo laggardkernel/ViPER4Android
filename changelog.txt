@@ -1,3 +1,4 @@
+ViPERFX
 v1
     - Add Nougat SELinux patch
 v2
@@ -10,3 +11,18 @@ v4
     - Update library to v2.5.0.5
     - http://www.audlabs.com/dists/ViPERFX_v2.5.0.5.apk
     - Install ViPERFX app automatically during boot 
+    
+LeEco LeMax 2 Atmos
+r1.0
+    - Rebuilt from newest 1.8 firmware release
+    - Audio post-processing (hifi/dts/dirac) integrated into apks (was omitted from previous builds)
+    - Permissions no longer need to be manually turned on with MM+
+    - Bug fixes
+r0.2
+    - Fixed install script
+r0.1
+    - Initial public BETA
+    - Changed both app's namespace
+    - Changed audio effect UUIDs
+    - Merged framework files
+    - Backported for support from Jellybean to Android N 

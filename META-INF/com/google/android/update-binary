@@ -171,6 +171,9 @@ MODPATH=$MOUNTPATH/$MODID
 
 # Delete existing temporary files
 rm -rf $INSTALLER
+rm -rf $TMPDIR/v4a
+rm -rf $TMPDIR/dap
+rm -rf $TMPDIR/dax
 
 mkdir -p $INSTALLER
 cd $INSTALLER
@@ -279,6 +282,9 @@ fi
 
 # Create mod paths
 rm -rf $MODPATH
+rm -rf $MOUNTPATH/v4a
+rm -rf $MOUNTPATH/dap
+rm -rf $MOUNTPATH/dax
 mkdir -p $MODPATH
 
 mkdir -p $MODPATH/system/lib/soundfx 2>/dev/null
@@ -287,12 +293,16 @@ mkdir -p $MODPATH/system/vendor/etc 2>/dev/null
 
 # Copy files
 ui_print "- Copying files"
+# Additonal libeffectproxy from LG, lib64effectproxy from Sony.
+# Thanks for guitardedhero
+cp -af $INSTALLER/system/* $MODPATH/system
+if (! $IS64BIT); then rm -rf $MODPATH/system/lib64; fi;
 
 # Copy v4a lib
 cp -af $LIB $MODPATH/system/lib/soundfx/libv4a_fx_ics.so
 
 # Copy APK, installation is done by post-fs-data.sh
-if [ -f "$INSTALLER/ViPERFX.apk" ]; then
+if [ -f "$INSTALLER/$APKNAME" ]; then
   cp -af $INSTALLER/$APKNAME /data/$APKNAME
 fi
 
@@ -318,19 +328,27 @@ if [ -f "$MODPATH$CONFIG_FILE" ]; then
   sed -i '/v4a_standard_fx {/,/}/d' $MODPATH$CONFIG_FILE
   sed -i 's/^libraries {/libraries {\n  v4a_fx {\n    path \/system\/lib\/soundfx\/libv4a_fx_ics.so\n  }/g' $MODPATH$CONFIG_FILE
   sed -i 's/^effects {/effects {\n  v4a_standard_fx {\n    library v4a_fx\n    uuid 41d3c987-e6cf-11e3-a88a-11aba5d5c51b\n  }/g' $MODPATH$CONFIG_FILE
-  # Dolby Atmos
-  #sed -i 'H;1h;$!d;x; s/[[:blank:]]*dax {[^{}]*\({[^}]*}[^{}]*\)*}[[:blank:]]*\n//g' $MODPATH$CONFIG_FILE
-  #sed -i '/dax {/,/}/d' $MODPATH$CONFIG_FILE
-  #sed -i '/dax_sw {/,/}/d' $MODPATH$CONFIG_FILE
-  #sed -i '/dax_hw {/,/}/d' $MODPATH$CONFIG_FILE
-  #if [ "$PRODUCT" = "OnePlus3" ] || [ "$PRODUCT" = "oneplus3" ]; then
-  #  sed -i '/ds_sw {/,/}/d' $MODPATH$CONFIG_FILE
-  #  sed -i '/ds_hw {/,/}/d' $MODPATH$CONFIG_FILE
-  #  sed -i '/DOLBY_DAP/,/DOLBY_END/d' $MODPATH$CONFIG_FILE
-  #fi
+  # LeEco LeMax 2 Atmos
+  sed -i 'H;1h;$!d;x; s/[[:blank:]]*dax {[^{}]*\({[^}]*}[^{}]*\)*}[[:blank:]]*\n//g' $MODPATH$CONFIG_FILE
+  sed -i '/dax {/,/}/d' $MODPATH$CONFIG_FILE
+  sed -i '/dax_sw {/,/}/d' $MODPATH$CONFIG_FILE
+  sed -i '/dax_hw {/,/}/d' $MODPATH$CONFIG_FILE
+  if [ "$PRODUCT" = "OnePlus3" ] || [ "$PRODUCT" = "oneplus3" ]; then
+    sed -i '/ds_sw {/,/}/d' $MODPATH$CONFIG_FILE
+    sed -i '/ds_hw {/,/}/d' $MODPATH$CONFIG_FILE
+    sed -i '/DOLBY_DAP/,/DOLBY_END/d' $MODPATH$CONFIG_FILE
+  fi
   #sed -i '/ds {/,/}/d' $MODPATH$CONFIG_FILE
-  #sed -i 's/^libraries {/libraries {\n  dax {\n    path \/system\/lib\/soundfx\/libswdax.so\n  }/g' $MODPATH$CONFIG_FILE
-  #sed -i 's/^effects {/effects {\n  dax {\n    library dax\n    uuid 9d4921da-8225-4f29-aefa-6e6f69726861\n  }/g' $MODPATH$CONFIG_FILE
+  sed -i 's/^libraries {/libraries {\n  dax {\n    path \/system\/lib\/soundfx\/libswdax.so\n  }/g' $MODPATH$CONFIG_FILE
+  sed -i 's/^effects {/effects {\n  dax {\n    library dax\n    uuid 9d4921da-8225-4f29-aefa-6e6f69726861\n  }/g' $MODPATH$CONFIG_FILE
+  # Lenovo K3 Dolby ATMOS
+  #sed -i '/dap {/,/}/d' $MODPATH$CONFIG_FILE
+  #sed -i 's/^libraries {/libraries {\n  dap {\n    path \/system\/lib\/soundfx\/libswdap-mod.so\n  }/g' $MODPATH$CONFIG_FILE
+  #sed -i 's/^effects {/effects {\n  dap {\n    library dap\n    uuid 9d4921da-8225-4f29-aefa-39537a041337\n  }/g' $MODPATH$CONFIG_FILE
+  # ZTE Axon 7 Atmos
+  #sed -i 's/^libraries {/libraries {\n  dax_sw {\n    path \/system\/vendor\/lib\/soundfx\/libswdax.so\n  }/g' $MODPATH$CONFIG_FILE
+  #sed -i 's/^libraries {/libraries {\n  dax_hw {\n    path \/system\/vendor\/lib\/soundfx\/libhwdax.so\n  }/g' $MODPATH$CONFIG_FILE
+  #sed -i 's/^effects {/effects {\n  dax {\n    library proxy\n    uuid 9d4921da-8225-4f29-aefa-6e6f69726861\n\n    libsw {\n      library dax_sw\n      uuid 6ab06da4-c516-4611-8166-6168726e6f69\n    }\n\n    libhw {\n      library dax_hw\n      uuid a0c30891-8246-4aef-b8ad-696f6e726861\n    }\n  }/g' $MODPATH$CONFIG_FILE
 fi
 
 if [ -f "$MODPATH$VENDOR_CONFIG" ]; then
@@ -339,19 +357,27 @@ if [ -f "$MODPATH$VENDOR_CONFIG" ]; then
   sed -i '/v4a_standard_fx {/,/}/d' $MODPATH$VENDOR_CONFIG
   sed -i 's/^libraries {/libraries {\n  v4a_fx {\n    path \/system\/lib\/soundfx\/libv4a_fx_ics.so\n  }/g' $MODPATH$VENDOR_CONFIG
   sed -i 's/^effects {/effects {\n  v4a_standard_fx {\n    library v4a_fx\n    uuid 41d3c987-e6cf-11e3-a88a-11aba5d5c51b\n  }/g' $MODPATH$VENDOR_CONFIG
-  # Dolby Atmos
-  #sed -i 'H;1h;$!d;x; s/[[:blank:]]*dax {[^{}]*\({[^}]*}[^{}]*\)*}[[:blank:]]*\n//g' $MODPATH$VENDOR_CONFIG
-  #sed -i '/dax {/,/}/d' $MODPATH$VENDOR_CONFIG
-  #sed -i '/dax_sw {/,/}/d' $MODPATH$VENDOR_CONFIG
-  #sed -i '/dax_hw {/,/}/d' $MODPATH$VENDOR_CONFIG
-  #if [ "$PRODUCT" = "OnePlus3" ] || [ "$PRODUCT" = "oneplus3" ]; then
-  #  sed -i '/ds_sw {/,/}/d' $MODPATH$VENDOR_CONFIG
-  #  sed -i '/ds_hw {/,/}/d' $MODPATH$VENDOR_CONFIG
-  #  sed -i '/DOLBY_DAP/,/DOLBY_END/d' $MODPATH$VENDOR_CONFIG
-  #fi
+  # LeEco LeMax 2 Atmos
+  sed -i 'H;1h;$!d;x; s/[[:blank:]]*dax {[^{}]*\({[^}]*}[^{}]*\)*}[[:blank:]]*\n//g' $MODPATH$VENDOR_CONFIG
+  sed -i '/dax {/,/}/d' $MODPATH$VENDOR_CONFIG
+  sed -i '/dax_sw {/,/}/d' $MODPATH$VENDOR_CONFIG
+  sed -i '/dax_hw {/,/}/d' $MODPATH$VENDOR_CONFIG
+  if [ "$PRODUCT" = "OnePlus3" ] || [ "$PRODUCT" = "oneplus3" ]; then
+    sed -i '/ds_sw {/,/}/d' $MODPATH$VENDOR_CONFIG
+    sed -i '/ds_hw {/,/}/d' $MODPATH$VENDOR_CONFIG
+    sed -i '/DOLBY_DAP/,/DOLBY_END/d' $MODPATH$VENDOR_CONFIG
+  fi
   #sed -i '/ds {/,/}/d' $MODPATH$VENDOR_CONFIG
-  #sed -i 's/^libraries {/libraries {\n  dax {\n    path \/system\/lib\/soundfx\/libswdax.so\n  }/g' $MODPATH$VENDOR_CONFIG
-  #sed -i 's/^effects {/effects {\n  dax {\n    library dax\n    uuid 9d4921da-8225-4f29-aefa-6e6f69726861\n  }/g' $MODPATH$VENDOR_CONFIG
+  sed -i 's/^libraries {/libraries {\n  dax {\n    path \/system\/lib\/soundfx\/libswdax.so\n  }/g' $MODPATH$VENDOR_CONFIG
+  sed -i 's/^effects {/effects {\n  dax {\n    library dax\n    uuid 9d4921da-8225-4f29-aefa-6e6f69726861\n  }/g' $MODPATH$VENDOR_CONFIG
+  # Lenovo K3 Dolby ATMOS
+  #sed -i '/dap {/,/}/d' $MODPATH$VENDOR_CONFIG
+  #sed -i 's/^libraries {/libraries {\n  dap {\n    path \/system\/lib\/soundfx\/libswdap-mod.so\n  }/g' $MODPATH$VENDOR_CONFIG
+  #sed -i 's/^effects {/effects {\n  dap {\n    library dap\n    uuid 9d4921da-8225-4f29-aefa-39537a041337\n  }/g' $MODPATH$VENDOR_CONFIG
+  # ZTE Axon 7 Atmos
+  #sed -i 's/^libraries {/libraries {\n  dax_sw {\n    path \/system\/vendor\/lib\/soundfx\/libswdax.so\n  }/g' $MODPATH$VENDOR_CONFIG
+  #sed -i 's/^libraries {/libraries {\n  dax_hw {\n    path \/system\/vendor\/lib\/soundfx\/libhwdax.so\n  }/g' $MODPATH$VENDOR_CONFIG
+  #sed -i 's/^effects {/effects {\n  dax {\n    library proxy\n    uuid 9d4921da-8225-4f29-aefa-6e6f69726861\n\n    libsw {\n      library dax_sw\n      uuid 6ab06da4-c516-4611-8166-6168726e6f69\n    }\n\n    libhw {\n      library dax_hw\n      uuid a0c30891-8246-4aef-b8ad-696f6e726861\n    }\n  }/g' $MODPATH$VENDOR_CONFIG
 fi
 
 if [ -f "$MODPATH$HTC_CONFIG_FILE" ]; then
@@ -360,14 +386,22 @@ if [ -f "$MODPATH$HTC_CONFIG_FILE" ]; then
   sed -i '/v4a_standard_fx {/,/}/d' $MODPATH$HTC_CONFIG_FILE
   sed -i 's/^libraries {/libraries {\n  v4a_fx {\n    path \/system\/lib\/soundfx\/libv4a_fx_ics.so\n  }/g' $MODPATH$HTC_CONFIG_FILE
   sed -i 's/^effects {/effects {\n  v4a_standard_fx {\n    library v4a_fx\n    uuid 41d3c987-e6cf-11e3-a88a-11aba5d5c51b\n  }/g' $MODPATH$HTC_CONFIG_FILE
-  # Dolby Atmos
-  #sed -i 'H;1h;$!d;x; s/[[:blank:]]*dax {[^{}]*\({[^}]*}[^{}]*\)*}[[:blank:]]*\n//g' $MODPATH$HTC_CONFIG_FILE
-  #sed -i '/dax {/,/}/d' $MODPATH$HTC_CONFIG_FILE
-  #sed -i '/dax_sw {/,/}/d' $MODPATH$HTC_CONFIG_FILE
-  #sed -i '/dax_hw {/,/}/d' $MODPATH$HTC_CONFIG_FILE
+  # LeEco LeMax 2 Atmos
+  sed -i 'H;1h;$!d;x; s/[[:blank:]]*dax {[^{}]*\({[^}]*}[^{}]*\)*}[[:blank:]]*\n//g' $MODPATH$HTC_CONFIG_FILE
+  sed -i '/dax {/,/}/d' $MODPATH$HTC_CONFIG_FILE
+  sed -i '/dax_sw {/,/}/d' $MODPATH$HTC_CONFIG_FILE
+  sed -i '/dax_hw {/,/}/d' $MODPATH$HTC_CONFIG_FILE
   #sed -i '/ds {/,/}/d' $MODPATH$HTC_CONFIG_FILE
-  #sed -i 's/^libraries {/libraries {\n  dax {\n    path \/system\/lib\/soundfx\/libswdax.so\n  }/g' $MODPATH$HTC_CONFIG_FILE
-  #sed -i 's/^effects {/effects {\n  dax {\n    library dax\n    uuid 9d4921da-8225-4f29-aefa-6e6f69726861\n  }/g' $MODPATH$HTC_CONFIG_FILE
+  sed -i 's/^libraries {/libraries {\n  dax {\n    path \/system\/lib\/soundfx\/libswdax.so\n  }/g' $MODPATH$HTC_CONFIG_FILE
+  sed -i 's/^effects {/effects {\n  dax {\n    library dax\n    uuid 9d4921da-8225-4f29-aefa-6e6f69726861\n  }/g' $MODPATH$HTC_CONFIG_FILE
+  # Lenovo K3 Dolby ATMOS
+  #sed -i '/dap {/,/}/d' $MODPATH$HTC_CONFIG_FILE
+  #sed -i 's/^libraries {/libraries {\n  dap {\n    path \/system\/lib\/soundfx\/libswdap-mod.so\n  }/g' $MODPATH$HTC_CONFIG_FILE
+  #sed -i 's/^effects {/effects {\n  dap {\n    library dap\n    uuid 9d4921da-8225-4f29-aefa-39537a041337\n  }/g' $MODPATH$HTC_CONFIG_FILE
+  # ZTE Axon 7 Atmos
+  #sed -i 's/^libraries {/libraries {\n  dax_sw {\n    path \/system\/vendor\/lib\/soundfx\/libswdax.so\n  }/g' $MODPATH$HTC_CONFIG_FILE
+  #sed -i 's/^libraries {/libraries {\n  dax_hw {\n    path \/system\/vendor\/lib\/soundfx\/libhwdax.so\n  }/g' $MODPATH$HTC_CONFIG_FILE
+  #sed -i 's/^effects {/effects {\n  dax {\n    library proxy\n    uuid 9d4921da-8225-4f29-aefa-6e6f69726861\n\n    libsw {\n      library dax_sw\n      uuid 6ab06da4-c516-4611-8166-6168726e6f69\n    }\n\n    libhw {\n      library dax_hw\n      uuid a0c30891-8246-4aef-b8ad-696f6e726861\n    }\n  }/g' $MODPATH$HTC_CONFIG_FILE
 fi
 
 if [ -f "$MODPATH$OTHER_VENDOR_FILE" ]; then
@@ -376,14 +410,22 @@ if [ -f "$MODPATH$OTHER_VENDOR_FILE" ]; then
   sed -i '/v4a_standard_fx {/,/}/d' $MODPATH$OTHER_VENDOR_FILE
   sed -i 's/^libraries {/libraries {\n  v4a_fx {\n    path \/system\/lib\/soundfx\/libv4a_fx_ics.so\n  }/g' $MODPATH$OTHER_VENDOR_FILE
   sed -i 's/^effects {/effects {\n  v4a_standard_fx {\n    library v4a_fx\n    uuid 41d3c987-e6cf-11e3-a88a-11aba5d5c51b\n  }/g' $MODPATH$OTHER_VENDOR_FILE
-  # Dolby Atmos
-  #sed -i 'H;1h;$!d;x; s/[[:blank:]]*dax {[^{}]*\({[^}]*}[^{}]*\)*}[[:blank:]]*\n//g' $MODPATH$OTHER_VENDOR_FILE
-  #sed -i '/dax {/,/}/d' $MODPATH$OTHER_VENDOR_FILE
-  #sed -i '/dax_sw {/,/}/d' $MODPATH$OTHER_VENDOR_FILE
-  #sed -i '/dax_hw {/,/}/d' $MODPATH$OTHER_VENDOR_FILE
+  # LeEco LeMax 2 Atmos
+  sed -i 'H;1h;$!d;x; s/[[:blank:]]*dax {[^{}]*\({[^}]*}[^{}]*\)*}[[:blank:]]*\n//g' $MODPATH$OTHER_VENDOR_FILE
+  sed -i '/dax {/,/}/d' $MODPATH$OTHER_VENDOR_FILE
+  sed -i '/dax_sw {/,/}/d' $MODPATH$OTHER_VENDOR_FILE
+  sed -i '/dax_hw {/,/}/d' $MODPATH$OTHER_VENDOR_FILE
   #sed -i '/ds {/,/}/d' $MODPATH$OTHER_VENDOR_FILE
-  #sed -i 's/^libraries {/libraries {\n  dax {\n    path \/system\/lib\/soundfx\/libswdax.so\n  }/g' $MODPATH$OTHER_VENDOR_FILE
-  #sed -i 's/^effects {/effects {\n  dax {\n    library dax\n    uuid 9d4921da-8225-4f29-aefa-6e6f69726861\n  }/g' $MODPATH$OTHER_VENDOR_FILE
+  sed -i 's/^libraries {/libraries {\n  dax {\n    path \/system\/lib\/soundfx\/libswdax.so\n  }/g' $MODPATH$OTHER_VENDOR_FILE
+  sed -i 's/^effects {/effects {\n  dax {\n    library dax\n    uuid 9d4921da-8225-4f29-aefa-6e6f69726861\n  }/g' $MODPATH$OTHER_VENDOR_FILE
+  # Lenovo K3 Dolby ATMOS
+  #sed -i '/dap {/,/}/d' $MODPATH$OTHER_VENDOR_FILE
+  #sed -i 's/^libraries {/libraries {\n  dap {\n    path \/system\/lib\/soundfx\/libswdap-mod.so\n  }/g' $MODPATH$OTHER_VENDOR_FILE
+  #sed -i 's/^effects {/effects {\n  dap {\n    library dap\n    uuid 9d4921da-8225-4f29-aefa-39537a041337\n  }/g' $MODPATH$OTHER_VENDOR_FILE
+  # ZTE Axon 7 Atmos
+  #sed -i 's/^libraries {/libraries {\n  dax_sw {\n    path \/system\/vendor\/lib\/soundfx\/libswdax.so\n  }/g' $MODPATH$OTHER_VENDOR_FILE
+  #sed -i 's/^libraries {/libraries {\n  dax_hw {\n    path \/system\/vendor\/lib\/soundfx\/libhwdax.so\n  }/g' $MODPATH$OTHER_VENDOR_FILE
+  #sed -i 's/^effects {/effects {\n  dax {\n    library proxy\n    uuid 9d4921da-8225-4f29-aefa-6e6f69726861\n\n    libsw {\n      library dax_sw\n      uuid 6ab06da4-c516-4611-8166-6168726e6f69\n    }\n\n    libhw {\n      library dax_hw\n      uuid a0c30891-8246-4aef-b8ad-696f6e726861\n    }\n  }/g' $MODPATH$OTHER_VENDOR_FILE
 fi
 
 if [ -f "$MODPATH$OFFLOAD_CONFIG" ]; then
@@ -392,14 +434,22 @@ if [ -f "$MODPATH$OFFLOAD_CONFIG" ]; then
   sed -i '/v4a_standard_fx {/,/}/d' $MODPATH$OFFLOAD_CONFIG
   sed -i 's/^libraries {/libraries {\n  v4a_fx {\n    path \/system\/lib\/soundfx\/libv4a_fx_ics.so\n  }/g' $MODPATH$OFFLOAD_CONFIG
   sed -i 's/^effects {/effects {\n  v4a_standard_fx {\n    library v4a_fx\n    uuid 41d3c987-e6cf-11e3-a88a-11aba5d5c51b\n  }/g' $MODPATH$OFFLOAD_CONFIG
-  # Dolby Atmos
-  #sed -i 'H;1h;$!d;x; s/[[:blank:]]*dax {[^{}]*\({[^}]*}[^{}]*\)*}[[:blank:]]*\n//g' $MODPATH$OFFLOAD_CONFIG
-  #sed -i '/dax {/,/}/d' $MODPATH$OFFLOAD_CONFIG
-  #sed -i '/dax_sw {/,/}/d' $MODPATH$OFFLOAD_CONFIG
-  #sed -i '/dax_hw {/,/}/d' $MODPATH$OFFLOAD_CONFIG
+  # LeEco LeMax 2 Atmos
+  sed -i 'H;1h;$!d;x; s/[[:blank:]]*dax {[^{}]*\({[^}]*}[^{}]*\)*}[[:blank:]]*\n//g' $MODPATH$OFFLOAD_CONFIG
+  sed -i '/dax {/,/}/d' $MODPATH$OFFLOAD_CONFIG
+  sed -i '/dax_sw {/,/}/d' $MODPATH$OFFLOAD_CONFIG
+  sed -i '/dax_hw {/,/}/d' $MODPATH$OFFLOAD_CONFIG
   #sed -i '/ds {/,/}/d' $MODPATH$OFFLOAD_CONFIG
-  #sed -i 's/^libraries {/libraries {\n  dax {\n    path \/system\/lib\/soundfx\/libswdax.so\n  }/g' $MODPATH$OFFLOAD_CONFIG
-  #sed -i 's/^effects {/effects {\n  dax {\n    library dax\n    uuid 9d4921da-8225-4f29-aefa-6e6f69726861\n  }/g' $MODPATH$OFFLOAD_CONFIG
+  sed -i 's/^libraries {/libraries {\n  dax {\n    path \/system\/lib\/soundfx\/libswdax.so\n  }/g' $MODPATH$OFFLOAD_CONFIG
+  sed -i 's/^effects {/effects {\n  dax {\n    library dax\n    uuid 9d4921da-8225-4f29-aefa-6e6f69726861\n  }/g' $MODPATH$OFFLOAD_CONFIG
+  # Lenovo K3 Dolby ATMOS
+  #sed -i '/dap {/,/}/d' $MODPATH$OFFLOAD_CONFIG
+  #sed -i 's/^libraries {/libraries {\n  dap {\n    path \/system\/lib\/soundfx\/libswdap-mod.so\n  }/g' $MODPATH$OFFLOAD_CONFIG
+  #sed -i 's/^effects {/effects {\n  dap {\n    library dap\n    uuid 9d4921da-8225-4f29-aefa-39537a041337\n  }/g' $MODPATH$OFFLOAD_CONFIG
+  # ZTE Axon 7 Atmos
+  #sed -i 's/^libraries {/libraries {\n  dax_sw {\n    path \/system\/vendor\/lib\/soundfx\/libswdax.so\n  }/g' $MODPATH$OFFLOAD_CONFIG
+  #sed -i 's/^libraries {/libraries {\n  dax_hw {\n    path \/system\/vendor\/lib\/soundfx\/libhwdax.so\n  }/g' $MODPATH$OFFLOAD_CONFIG
+  #sed -i 's/^effects {/effects {\n  dax {\n    library proxy\n    uuid 9d4921da-8225-4f29-aefa-6e6f69726861\n\n    libsw {\n      library dax_sw\n      uuid 6ab06da4-c516-4611-8166-6168726e6f69\n    }\n\n    libhw {\n      library dax_hw\n      uuid a0c30891-8246-4aef-b8ad-696f6e726861\n    }\n  }/g' $MODPATH$OFFLOAD_CONFIG
 fi
 
 <<COMMENT_HTC_VENDOR

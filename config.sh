@@ -45,9 +45,16 @@ POSTFSDATA=true
 # Set to true if you need late_start service script
 LATESTARTSERVICE=true
 
-VERSION="2.5.0.5"
+VERSION1="v2.5.0.5"
 APKNAME=ViPERFX.apk
 PACKAGENAME=com.audlabs.viperfx
+VERSION2="v2.3.a.12"
+REV="r1.0"
+#APP1="Ax"
+#APP2="AxUI"
+#TMPDIR="dax"
+#SYSTEM="system"
+#SYSTEMLESS="systemless"
 
 # FILE LOCATIONS
 CONFIG_FILE=/system/etc/audio_effects.conf
@@ -66,7 +73,16 @@ OFFLOAD_CONFIG=/system/etc/audio_effects_offload.conf
 print_modname() {
   ui_print "*******************************"
   ui_print "        ViPERFX (Magisk)       "
-  ui_print "           v$VERSION           "
+  ui_print "           $VERSION1           "
+  ui_print "        by ViPERsAudio         "
+  ui_print "*******************************"
+  ui_print "  LeEco LeMax 2 Atmos (Magisk) "
+  ui_print "           $VERSION2           "
+  ui_print "     selinux enforcing fix     "
+  ui_print "        Universal - Mod        "
+  ui_print "        Revision $REV          "
+  ui_print "          by ahrion            "
+  ui_print "*******************************"
   ui_print "  Magisk Mod by laggardkernel  "
   ui_print "*******************************"
 }
