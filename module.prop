@@ -1,6 +1,6 @@
 id=v4a
 name=ViPERFX + LeEco LeMax 2 Atmos
-version=v2.5.0.5
+version=v2.5.0.5 + v2.3.a.12_r1.0
 versionCode=1
 author=ViPER’s Audio & ahrion
 description=ViPERFX sound mod by ViPER’s Audio, LeEco LeMax 2 Atmos ported by ahrion, combined by laggardkernel as a Magisk module
