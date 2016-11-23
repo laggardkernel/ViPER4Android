@@ -55,7 +55,7 @@ HTC_CONFIG_FILE=/system/etc/htc_audio_effects.conf
 VENDOR_CONFIG=/system/vendor/etc/audio_effects.conf
 OTHER_VENDOR_FILE=/system/etc/audio_effects_vendor.conf
 OFFLOAD_CONFIG=/system/etc/audio_effects_offload.conf
-#HTC_VENDOR=/vendor/etc/audio_effects.conf
+HTC_VENDOR=/vendor/etc/audio_effects.conf
 
 ##########################################################################################
 # Installation Message
