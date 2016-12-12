@@ -7,4 +7,8 @@ v2
 v3
     - rebuild to compatiblize with Magisk v9, set props by resetprop method.
 v4
-    - Install ViPER4Android app automatically during boot 
+    - Update library to v2.5.0.5
+    - http://www.audlabs.com/dists/ViPERFX_v2.5.0.5.apk
+    - Install ViPERFX app automatically during boot 
+v5
+    - Scripts improvement, tweakprop compatible
