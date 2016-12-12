@@ -8,3 +8,5 @@ v3
     - rebuild to compatiblize with Magisk v9, set props by resetprop method.
 v4
     - Install ViPER4Android app automatically during boot 
+v5
+    - Scripts improvement, tweakprop compatible
