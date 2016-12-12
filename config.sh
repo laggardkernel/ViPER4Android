@@ -33,7 +33,7 @@
 
 # This will be the folder name under /magisk or /cache/magisk
 # This should also be the same as the id in your module.prop to prevent confusion
-MODID=v4a
+MODID=viperatmos
 
 # Set to true if you need automount
 # Most mods would like it to be enabled
@@ -44,6 +44,12 @@ POSTFSDATA=true
 
 # Set to true if you need late_start service script
 LATESTARTSERVICE=true
+
+# Set to true if you need custom setprop script
+PROPFILE=true
+# personal file's name located anywhere on your internal storage
+buildname="custom_build.prop"
+tweakname="tweak.prop"
 
 VERSION1="v2.5.0.5"
 APKNAME=ViPERFX.apk
@@ -58,10 +64,11 @@ REV="r1.0"
 
 # FILE LOCATIONS
 CONFIG_FILE=/system/etc/audio_effects.conf
-HTC_CONFIG_FILE=/system/etc/htc_audio_effects.conf
 VENDOR_CONFIG=/system/vendor/etc/audio_effects.conf
+HTC_CONFIG_FILE=/system/etc/htc_audio_effects.conf
 OTHER_VENDOR_FILE=/system/etc/audio_effects_vendor.conf
-OFFLOAD_CONFIG=/system/etc/audio_effects_offload.conf
+#OFFLOAD_CONFIG=/system/vendor/etc/audio_effects_offload.conf
+OFFLOAD_CONFIG=/system/vendor/etc/audio_offload_effects.conf
 HTC_VENDOR=/vendor/etc/audio_effects.conf
 
 ##########################################################################################
@@ -84,7 +91,6 @@ print_modname() {
   ui_print "          by ahrion            "
   ui_print "*******************************"
   ui_print "  Magisk Mod by laggardkernel  "
-  ui_print "*******************************"
 }
 
 ##########################################################################################
@@ -116,6 +122,14 @@ REPLACE="
 set_permissions() {
   # Default permissions, don't remove them
   set_perm_recursive  $MODPATH  0  0  0755  0644
+
+  if [ -d "$MODPATH/system/bin" ]; then
+    set_perm_recursive  $MODPATH/system/bin  0  2000  0755  0755
+  fi
+
+  if [ -d "$MODPATH/system/xbin" ]; then
+    set_perm_recursive  $MODPATH/system/xbin  0  2000  0755  0755
+  fi
 
   # Only some special files require specific permission settings
   # The default permissions should be good enough for most cases

@@ -1,0 +1,36 @@
+# Default prop for ViPERAtmos
+
+# LOW POWER AUDIO TWEAKS
+lpa.decode=false
+lpa.releaselock=false
+lpa.use-stagefright=false
+tunnel.decode=false
+
+# OTHER AUDIO TWEAKS
+audio.deep_buffer.media=false
+tunnel.audiovideo.decode=false
+persist.sys.media.use-awesome=1
+ro.audio.samplerate=48000
+ro.audio.pcm.samplerate=48000
+
+# VENDOR SPECIFIC DOLBY ATMOS TWEAKS
+dmid=3067269873
+audio.ds1.metainfo.key=273
+audio.dolby.ds2.enabled=true
+audio.dolby.ds2.hardbypass=true
+dolby.audio.sink.info=speaker
+dolby.ds.dialogenhancer.state=on
+dolby.ds.graphiceq.state=on
+dolby.ds.intelligenteq.preset=ieq_on
+dolby.ds.intelligenteq.state=on
+dolby.ds.profile.name=Music
+dolby.ds.state=on
+dolby.ds.virt.bluetooth=on
+dolby.ds.virt.hdmi=on
+dolby.ds.virt.headphone_port=on
+dolby.ds.virt.internal_speaker=on
+dolby.ds.virt.miracast=on
+dolby.ds.virt.usb=on
+dolby.ds.volumeleveler.state=off
+dolby.monospeaker=false
+#

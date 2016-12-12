@@ -492,6 +492,12 @@ if [ -f "/vendor/etc/audio_policy.conf" ]; then
 fi
 COMMENT_VENDOR_POLICY
 
+# build property database patch for MOD by resetprop, through a
+# property file called "custom_build.prop" or any other name
+if ($PROPFILE); then
+  cp -af "$INSTALLER/common/$buildname" "$MODPATH/$buildname"
+fi
+
 <<COMMENT_BUILD_PROP
 # build.prop patch for ViPER4Android Stock by replacing build.prop.
 # setprop in post-fs-data.sh may not work well on some devices.

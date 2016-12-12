@@ -7,11 +7,12 @@ LOGFILE=/cache/magisk.log
 APKNAME=ViPERFX.apk
 PACKAGENAME=com.audlabs.viperfx
 REBOOT=false
+MODNAME="ViPERAtmos"
 
 log_print() {
-  echo "v4a: $1"
-  echo "v4a: $1" >> $LOGFILE
-  log -p i -t v4a "$1"
+  echo "$MODNAME: $1"
+  echo "$MODNAME: $1" >> $LOGFILE
+  log -p i -t $MODNAME "$1"
 }
 
 # This script will be executed in post-fs-data mode
@@ -25,34 +26,28 @@ if [ -f "/cache/$APKNAME" ]; then
   cp /cache/$APKNAME /data/$APKNAME
   rm /cache/$APKNAME
 fi
+
 if [ -f "/data/$APKNAME" ]; then
   log_print "installing $APKNAME in /data"
-
-  APKPATH="$APKNAME"-1
-  for i in `ls /data/app | grep "$APKNAME"-`; do
+  APKPATH="$PACKAGENAME"-1
+  for i in `ls /data/app | grep "$PACKAGENAME"-`; do
     if [ `cat /data/system/packages.xml | grep $i >/dev/null 2>&1; echo $?` -eq 0 ]; then
       APKPATH=$i
       break;
     fi
   done
-  rm -rf /data/app/"$APKNAME"-*
-
+  rm -rf /data/app/"$PACKAGENAME"-*
   log_print "target path: /data/app/$APKPATH"
-
   mkdir /data/app/$APKPATH
   chown 1000.1000 /data/app/$APKPATH
   chmod 0755 /data/app/$APKPATH
   chcon u:object_r:apk_data_file:s0 /data/app/$APKPATH
-
   cp /data/$APKNAME /data/app/$APKPATH/base.apk
   chown 1000.1000 /data/app/$APKPATH/base.apk
   chmod 0644 /data/app/$APKPATH/base.apk
   chcon u:object_r:apk_data_file:s0 /data/app/$APKPATH/base.apk
-
   rm /data/$APKNAME
-
   sync
-
   # just in case
   REBOOT=true
 fi
