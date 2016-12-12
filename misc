@@ -1,9 +1,0 @@
-ro.audio.samplerate=48000
-ro.audio.pcm.samplerate=48000
-audio.deep_buffer.media=false
-lpa.decode=false
-lpa.releaselock=false
-lpa.use-stagefright=false
-tunnel.decode=false
-tunnel.audiovideo.decode=false
-persist.sys.media.use-awesome=1
