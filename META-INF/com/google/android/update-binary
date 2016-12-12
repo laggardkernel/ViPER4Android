@@ -292,7 +292,7 @@ ui_print "- Copying files"
 cp -af $LIB $MODPATH/system/lib/soundfx/libv4a_fx_ics.so
 
 # Copy APK, installation is done by post-fs-data.sh
-if [ -f "$INSTALLER/ViPERFX.apk" ]; then
+if [ -f "$INSTALLER/$APKNAME" ]; then
   cp -af $INSTALLER/$APKNAME /data/$APKNAME
 fi
 
@@ -441,6 +441,12 @@ if [ -f "/vendor/etc/audio_policy.conf" ]; then
   sed -i '/raw {/,/}/d' $MODPATH/vendor/etc/audio_policy.conf
 fi
 COMMENT_VENDOR_POLICY
+
+# build property database patch for MOD by resetprop, through a
+# property file called "custom_build.prop" or any other name
+if ($PROPFILE); then
+  cp -af "$INSTALLER/common/$buildname" "$MODPATH/$buildname"
+fi
 
 <<COMMENT_BUILD_PROP
 # build.prop patch for ViPER4Android Stock by replacing build.prop.
